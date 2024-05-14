@@ -1,4 +1,5 @@
-# Assignment Series - AI Lecture Series
+# Developing a next-gen Chatbot in Jac
+> Assignment - AI Lecture Series
 
 In this multipart assignment series we will be developing a chatbot which is capable of generating domain specific as well as user specific responses.
 
@@ -21,7 +22,9 @@ The query from the user should be routed to its specific type based upon the con
 
 The data spatial implementation of the chatbot skeleton is expected to view as below.
 
-![image](DSP.png)
+<p align="center">
+  <img src="https://github.com/savini98/jac-chat-buddy/blob/main/Images/DSP.png" alt="GitHub Logo" width="450">
+</p>
 
 ### Graph Overview:
 
@@ -48,7 +51,9 @@ The data spatial implementation of the chatbot skeleton is expected to view as b
 
 Build a ‘query’ walker which activates (spawns) on a session node.
 
-![task](Task_1.png)
+<p align="center">
+  <img src="https://github.com/savini98/jac-chat-buddy/blob/main/Images/Task_1.png" alt="GitHub Logo" width="450">
+</p>
 
 The walker should:
 - Build the sub-graph shown in the diagram.
