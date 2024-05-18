@@ -35,6 +35,7 @@ node todo{
     has todo_list:list = [];
 }
 
+
 '''
 This is the chat walker which will be used to chat with the user.
 The create_session ability:
@@ -56,6 +57,38 @@ walker create_graph{
     has todo_list:list = [];
 
     can generate_graph with `root entry;
+}
+
+walker query{
+    has query:str = '';
+    has user_session_id:str='';
+    has session_chat_history:list=[];
+    has user_data:dict={};
+    has todo_list:list=[];
+
+    can init_query_engine with session entry;
+}
+
+node router {
+    can route with query entry;
+}
+
+node RAG {
+    can run_RAG with query entry {
+        print('routed --> RAG');
+    }
+}
+
+node todo {
+    can run_todo with query entry {
+        print('routed --> TODO');
+    }
+}
+
+node user_qa {
+    can run_user_qa with query entry {
+        print('routed --> USER_QA');
+    }
 }
 
 with entry {
@@ -87,8 +120,9 @@ with entry {
     }
 
 :walker:chat:can:chat_session {
-    print(here.user_data);
-    print(here.todo_list);
+    # print(here.user_data);
+    # print(here.todo_list);
+    query() spawn here;
 }
 
 :walker:create_graph:can:generate_graph {
@@ -97,4 +131,29 @@ with entry {
     end ++> data(user_data = self.user_data); # Create a data node with the user data and connect it to the end node.
     end ++> todo(todo_list = self.todo_list); # Create a todo node with the todo list and connect it to the end node.
     chat() spawn [-->](`?user)[0]; # Spawn the chat walker with the user node.
+}
+
+:walker:query:can:init_query_engine {
+    self.user_data:dict = here.user_data;
+    self.todo_list:list = here.todo_list;
+    self.query:str = input('What is the routing method');
+
+    end = here;
+    end ++> (end := router());
+    end ++> RAG();
+    end ++> todo();
+    end ++> user_qa();
+
+    visit [-->];
+}
+
+:node:router:can:route {
+    task:str = here.query;
+    if task == 'RAG' {
+        visit [-->](`?RAG);
+    } elif task == 'QA'{
+        visit [-->](`?user_qa);
+    } elif task == 'TODO' {
+        visit [-->](`?todo);
+    }
 }
