@@ -73,19 +73,19 @@ node router {
     can route with query entry;
 }
 
-node RAG {
+node RAG_chat {
     can run_RAG with query entry {
         print('routed --> RAG');
     }
 }
 
-node todo {
+node todo_chat {
     can run_todo with query entry {
         print('routed --> TODO');
     }
 }
 
-node user_qa {
+node user_qa_chat {
     can run_user_qa with query entry {
         print('routed --> USER_QA');
     }
@@ -136,24 +136,24 @@ with entry {
 :walker:query:can:init_query_engine {
     self.user_data:dict = here.user_data;
     self.todo_list:list = here.todo_list;
-    self.query:str = input('What is the routing method');
+    self.task_type:str = input('What is the routing method : ');
 
     end = here;
     end ++> (end := router());
-    end ++> RAG();
-    end ++> todo();
-    end ++> user_qa();
+    end ++> RAG_chat();
+    end ++> todo_chat();
+    end ++> user_qa_chat();
 
     visit [-->];
 }
 
 :node:router:can:route {
-    task:str = here.query;
+    task:str = here.task_type;
     if task == 'RAG' {
-        visit [-->](`?RAG);
+        visit [-->](`?RAG_chat);
     } elif task == 'QA'{
-        visit [-->](`?user_qa);
+        visit [-->](`?user_qa_chat);
     } elif task == 'TODO' {
-        visit [-->](`?todo);
+        visit [-->](`?todo_chat);
     }
 }
