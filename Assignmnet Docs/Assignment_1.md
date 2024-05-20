@@ -23,9 +23,12 @@ The data spatial implementation of the chatbot skeleton is expected to view as b
 
 #### Walkers:
 
-- **create_graph:** This walker creates the graph excluding session nodes.
+- **create_graph:** This walker creates the graph of chatbot skeleton shown in figure except the session node.
 
 - **chat:** This walker creates the session node while gathering all the data and saving to the session node.
+
+This is a [simple example](/1_chat_bot_graph_impl.jac) to create the graph of basic chatbot skeleton and the chat walker.
+
 
 ## Assignment 1 - Task
 
@@ -46,3 +49,7 @@ The walker should:
 - **User_QA :** This node will be implemented in coming weeks of the assignment. For now, when the query walker enters this node, it should print "I will respond using user data." and the ```user_data``` gathered in the session node.
 
 - **TODO nodes :** This node will be implemented in coming weeks of the assignment. For now, when the query walker enters this node, it should print "I will respond using user to-do list." and the ```todo``` gathered in the session node.
+
+## Assignment 1 - Solution
+
+This is the [solution](/1_solution.jac) for the Assignment 1 - Task.

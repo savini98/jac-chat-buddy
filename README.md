@@ -19,3 +19,4 @@ The final goal of this assignment is to build a chatbot which can use available 
 The query from the user should be routed to its specific type based upon the context offered in the query.
 
 ### [Assignment 1 - Building chatbot architecture in Jaclang](/Assignmnet%20Docs/Assignment_1.md)
+### [Assignment 2 - Building a basic chatbot](/Assignmnet%20Docs/Assignment_2.md)
