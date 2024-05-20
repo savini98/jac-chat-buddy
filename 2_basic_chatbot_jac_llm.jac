@@ -1,6 +1,7 @@
 import:py random;
 import:py from jaclang.core.llms, Anthropic;
 
+
 glob llm = Anthropic(model_name="claude-3-sonnet-20240229");
 
 '''
@@ -62,6 +63,14 @@ walker create_graph{
     can generate_graph with `root entry;
 }
 
+'''
+This is the query walker which will be used to query a user input and generate a response.
+The init_query_engine ability:
+    - Gathers the user data and todo list from the user node.
+    - Asks the user for the routing method.
+    - Creates a router node and connects it to the RAG_chat, todo_chat and user_qa_chat nodes.
+    - Visits the router node.
+'''
 walker query{
     has query:str = '';
     has user_session_id:str='';
@@ -72,16 +81,27 @@ walker query{
     can init_query_engine with session entry;
 }
 
+'''
+This is the router node which will be used to route the user query to the appropriate chat node.
+TODO:Auto-routing feature not yet implemented
+'''
 node router {
     can route with query entry;
 }
 
+'''
+This is the RAG chat node which will be used to chat with the user using Retrival Augmented Generation.
+TODO:Not yet implemented.
+'''
 node RAG_chat {
     can run_RAG with query entry {
         print('routed --> RAG');
     }
 }
 
+'''
+This is the TODO chat node which will be used to chat with the user using the todo list and user data.
+'''
 node todo_chat {
     can run_todo with query entry {
         print('routed --> TODO');
@@ -93,6 +113,10 @@ node todo_chat {
              query:'The tasks to be done by the user in the future.':str) -> 'response':str by llm();
 }
 
+'''
+This is the user QA chat node which will be used to chat with the user using the user data.
+TODO:Not yet implemented.
+'''
 node user_qa_chat {
     can run_user_qa with query entry {
         print('routed --> USER_QA');

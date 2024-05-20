@@ -59,6 +59,14 @@ walker create_graph{
     can generate_graph with `root entry;
 }
 
+'''
+This is the query walker which will be used to query a user input and generate a response.
+The init_query_engine ability:
+    - Gathers the user data and todo list from the user node.
+    - Asks the user for the routing method.
+    - Creates a router node and connects it to the RAG_chat, todo_chat and user_qa_chat nodes.
+    - Visits the router node.
+'''
 walker query{
     has query:str = '';
     has user_session_id:str='';
@@ -69,22 +77,37 @@ walker query{
     can init_query_engine with session entry;
 }
 
+'''
+This is the router node which will be used to route the user query to the appropriate chat node.
+TODO:Auto-routing feature not yet implemented
+'''
 node router {
     can route with query entry;
 }
 
+'''
+This is the RAG chat node which will be used to chat with the user using Retrival Augmented Generation.
+TODO:Not yet implemented.
+'''
 node RAG_chat {
     can run_RAG with query entry {
         print('routed --> RAG');
     }
 }
 
+'''
+This is the TODO chat node which will be used to chat with the user using the todo list and user data.
+'''
 node todo_chat {
     can run_todo with query entry {
         print('routed --> TODO');
     }
 }
 
+'''
+This is the user QA chat node which will be used to chat with the user using the user data.
+TODO:Not yet implemented.
+'''
 node user_qa_chat {
     can run_user_qa with query entry {
         print('routed --> USER_QA');
@@ -136,8 +159,9 @@ with entry {
 :walker:query:can:init_query_engine {
     self.user_data:dict = here.user_data;
     self.todo_list:list = here.todo_list;
-    self.task_type:str = input('What is the routing method : ');
+    self.task_type:str = input('What is the routing method : '); # Get the routing method from the user.
 
+    # Create a router node and connect it to the RAG_chat, todo_chat and user_qa_chat nodes.
     end = here;
     end ++> (end := router());
     end ++> RAG_chat();
