@@ -10,8 +10,7 @@ To install ```streamlit``` in terminal type,
 pip install streamlit
 ```
 
-[This](/3_streamlit_frontend.jac) is an implementation of a basic streamlit frontend for a simple ChatGPT-clone.
-
+[This](/3_streamlit_frontend_demo/) is an implementation of a basic streamlit frontend for a simple ChatGPT-clone.
 
 ## Assignment 3 - Task
 
