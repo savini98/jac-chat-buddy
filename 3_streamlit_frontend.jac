@@ -1,38 +1,38 @@
 import:py streamlit as st;
 
-import:py from jaclang.core.llms, Anthropic;
+import:py from jaclang.core.llms, Groq;
 
-glob llm = Anthropic(model_name="claude-3-sonnet-20240229");
+glob llm = Groq();
 
+can 'Continue the chat in a conversational mannor.'
+answer_query(messages: 'chat history including the newest message' : list[dict[str, str]]) -> 'response to the final query':str
+    by llm(temperature=0.7, max_tokens=1024);
 
+glob messages = [];
 
-st.title("ChatGPT-like clone")
+can main {
+    st.title("ChatGPT-like clone");
 
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+    for message in messages{
+        with st.chat_message(message["role"]){
+            st.markdown(message["content"]);
+        }
+    }
 
-if "openai_model" not in st.session_state:
-    st.session_state["openai_model"] = "gpt-3.5-turbo"
+    if prompt := st.chat_input("What is up?") {
+    messages.append({"role": "user", "content": prompt});
+    with st.chat_message("user"){
+        st.markdown(prompt);
+    }
 
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-if prompt := st.chat_input("What is up?"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    with st.chat_message("assistant"):
-        stream = client.chat.completions.create(
-            model=st.session_state["openai_model"],
-            messages=[
+    with st.chat_message("assistant"){
+        response = answer_query(messages=[
                 {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
-            ],
-            stream=True,
-        )
-        response = st.write_stream(stream)
-    st.session_state.messages.append({"role": "assistant", "content": response})
+                for m in messages
+            ]);
+        stream = st.write(response);
+    }
+
+    messages.append({"role": "assistant", "content": response});
+    }
+}
