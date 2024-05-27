@@ -19,7 +19,7 @@ This ability will be called by running streamlit run app.py
 '''
 can main {
     # Adding a title for the chatbot interface
-    st.title("JAC Chatbot");
+    st.title("ChatGPT Clone");
 
     # Display any previous queries and responses
     for message in messages{
