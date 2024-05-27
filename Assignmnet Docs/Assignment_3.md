@@ -19,6 +19,7 @@ Add a streamlit frontend for the 'Health Assistant Chatbot' built in Assignment 
 ### Should Include
 1. Chat interface, 
 2. Display the entire session conversation.
+3. A button to create a new chat session.
 
 ### Assumptions
 1. Consider only the operation of the TODO node.
