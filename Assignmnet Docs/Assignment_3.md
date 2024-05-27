@@ -1,6 +1,6 @@
 ## Assignment 3 - Preface
 
-When a developing a chatbot to interact with a user, it is important to have a graphical user interface. 
+When developing a chatbot to interact with a user, it is important to have a graphical user interface. 
 
 In order to build such a frontend, we will use the python package ```sreamlit``` in JacLang.
 
