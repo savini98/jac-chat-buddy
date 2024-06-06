@@ -1,6 +1,7 @@
 import:py random;
 import:py from jaclang.core.llms, OpenAI, Ollama, Huggingface;
 import:py streamlit as st;
+import:py from PIL, Image;
 
 glob llm1 = OpenAI(model_name='gpt-3.5-turbo');
 glob llm2 = OpenAI(model_name='gpt-4');
@@ -60,7 +61,6 @@ The create_session ability:
     - Spawns the chat session with the session id.
 '''
 walker chat{
-
     can create_session with user entry;
 }
 
@@ -106,14 +106,14 @@ glob router_examples: 'Examples of routing of a query': dict[str, task_type] = {
 
 '''
 This is the router node which will be used to route the user query to the appropriate chat node.
-TODO:Auto-routing feature not yet implemented
 '''
 node router {
     can route with query entry;
     can 'route the query to the appropriate task type'
     router_with_llm(query:'Query from the user to be routed.':str,
                     todo_list:'The tasks to be done by the user in the future.':list,
-                    user_data:'data about the health status of the user.':dict) -> task_type by llm1(method="Reason", temperature=0.0, incl_info=(router_examples));
+                    user_data:'data about the health status of the user.':dict) -> task_type
+                                        by llm1(method="Reason", temperature=0.0, incl_info=(router_examples));
 }
 
 '''
@@ -121,32 +121,15 @@ This is the RAG chat node which will be used to chat with the user using Retriva
 TODO:Not yet implemented.
 '''
 node RAG_chat {
-    can run_RAG with query entry {
-        print('routed --> RAG');
-    }
+    can run_RAG with query entry;
 }
 
 '''
 This is the TODO chat node which will be used to chat with the user using the todo list and user data.
 '''
 node todo_chat {
-    can run_todo with query entry {
-        print('routed --> TODO');
-
-        with st.chat_message("assistant"){
-        response = self.chat_llm(
-            todo_list=here.todo_list,
-            user_data=here.user_data,
-            query=here.query,
-            chat_history=here.messages
-            );
-        stream = st.write(response);
-        }
-        here.messages.append({"role": "assistant", "content": response});
-        save_data(messages = here.messages) spawn here;
-    }
-
-    can 'You are a Health Assistant. Give a response based on the query using todo list. and user data'
+    can run_todo with query entry;
+    can 'You are a warmly Health Assistant named JacCare. Give a response based on the query using todo list. and user data'
     chat_llm(todo_list:'The tasks to be done by the user in the future.':list,
              user_data:'data about the health status of the user.':dict,
              query:'Question from the user to be answered.':str,
@@ -158,23 +141,8 @@ This is the user QA chat node which will be used to chat with the user using the
 TODO:Not yet implemented.
 '''
 node user_qa_chat {
-    can run_user_qa with query entry {
-        print('routed --> USER_QA');
-
-        with st.chat_message("assistant"){
-        response = self.chat_llm(
-            user_data=here.user_data,
-            query=here.query,
-            chat_history=here.messages
-        );
-        stream = st.write(response);
-        }
-
-        here.messages.append({"role": "assistant", "content": response});
-        save_data(messages = here.messages) spawn here;
-    }
-
-    can 'You are a Health Assistant. Give a response based on the query using user data'
+    can run_user_qa with query entry;
+    can 'You are a warmly Health Assistant named JacCare. Give a response based on the query using user data'
     chat_llm(user_data:'data about the health status of the user.':dict,
              query:'Question form the user.':str,
              chat_history:'Previous Conversation with the user':list) -> 'response':str by llm2(method="Reason");
@@ -182,7 +150,7 @@ node user_qa_chat {
 
 walker save_data{
     has messages:list = [];
-    can go_to_router with todo_chat | user_qa_chat  entry {
+    can go_to_router with todo_chat | user_qa_chat entry {
         visit [<--];
     }
 
@@ -198,7 +166,18 @@ walker save_data{
 can main() {
     :g: state;
 
-    st.title("Baymax");
+    st.set_page_config(
+                    page_title="JacCare Health Assistant",
+                    page_icon=":robot:",
+                    layout="wide");
+    # (left_co, cent_co,last_co) = st.columns(3);
+    # with cent_co {
+    # st.image(Image.open("images/JacCare LOGO.png"));
+    # st.title("${\Large JacCare}$");
+    # }
+
+    st.image(Image.open("images/JacCare LOGO.png"));
+    st.title("Jac${Care}$");
 
     if state == PR_states.init_PR {
         create_graph(   user_data = {
@@ -229,7 +208,7 @@ can main() {
                                     "Last_Checkup_Date": "2024-05-10"
                                 },
 
-                     todo_list = [
+                        todo_list = [
                                     "Monitor blood pressure daily : 04/06/2024",
                                     "Take medication (Metformin, Atorvastatin) : 05/06/2024",
                                     "Schedule cardiology appointment : 10/06/2024",
@@ -240,16 +219,7 @@ can main() {
                                     "Annual physical checkup : 01/07/2024",
                                     "Renew prescription for medications : 02/07/2024",
                                     "Check cholesterol levels : 05/07/2024",
-                                    "Grocery shopping : 06/06/2024",
-                                    "Pick up dry cleaning : 07/06/2024",
-                                    "Call plumber for kitchen sink : 08/06/2024",
-                                    "Attend friend's wedding : 12/06/2024",
-                                    "Finish work project report : 18/06/2024",
-                                    "Family movie night : 22/06/2024",
-                                    "Plan weekend getaway : 28/06/2024",
-                                    "Pay utility bills : 29/06/2024",
-                                    "Renew car insurance : 03/07/2024",
-                                    "Buy birthday gift for spouse : 04/07/2024"
+                                    "Plan weekend getaway : 28/06/2024"
                                 ]) spawn root;
     state = PR_states.chat_create;
     print('Graph created');
@@ -330,9 +300,46 @@ can main() {
     print(task, type(task));
     # if task == task_type.RAG_type {
     #     visit [-->](`?RAG_chat);
-    if task == task_type.QA_TYPE{
+    if task == task_type.QA_TYPE | task == None {
         visit [-->](`?user_qa_chat);
     } elif task == task_type.TODO_TYPE {
         visit [-->](`?todo_chat);
     }
+}
+
+:node:todo_chat:can:run_todo {
+    print('routed --> TODO');
+
+    with st.chat_message("assistant"){
+        response = self.chat_llm(
+            todo_list=here.todo_list,
+            user_data=here.user_data,
+            query=here.query,
+            chat_history=here.messages
+        );
+        stream = st.write(response);
+    }
+
+    here.messages.append({"role": "assistant", "content": response});
+    save_data(messages = here.messages) spawn here;
+}
+
+:node:user_qa_chat:can:run_user_qa {
+    print('routed --> USER_QA');
+
+    with st.chat_message("assistant"){
+        response = self.chat_llm(
+            user_data=here.user_data,
+            query=here.query,
+            chat_history=here.messages
+        );
+        stream = st.write(response);
+    }
+
+    here.messages.append({"role": "assistant", "content": response});
+    save_data(messages = here.messages) spawn here;
+}
+
+:node:RAG_chat:can:run_RAG {
+    print('routed --> RAG');
 }
