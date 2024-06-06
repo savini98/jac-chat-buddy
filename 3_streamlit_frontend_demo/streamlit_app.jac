@@ -1,16 +1,19 @@
 import:py random;
-import:py from jaclang.core.llms, Anthropic;
+import:py from jaclang.core.llms, OpenAI, Ollama, Huggingface;
+import:py streamlit as st;
 
+glob llm1 = OpenAI(model_name='gpt-3.5-turbo');
+glob llm2 = OpenAI(model_name='gpt-4');
 
-glob llm = Anthropic(model_name="claude-3-sonnet-20240229");
+# glob llm = Huggingface(model_name='nvidia/Llama3-ChatQA-1.5-8B');
 
 enum PR_states {
-    init = 'initial run',
+    init_PR = 'initial run',
     chat_create = 'create chat graph',
     chat = 'chat with user'
 }
 
-glob state:PR_states = PR_states.init;
+glob state = PR_states.init_PR;
 
 '''
 User node has user_name attribute.
@@ -27,6 +30,7 @@ node session{
     has session_id : string = 100;
     has user_data : dict = {}; # User data such as habits, heart rate etc.
     has todo_list : list = []; # List of things to do by the user.
+    has messages : list = []; # Chat history of the user.
 }
 
 '''
@@ -84,9 +88,21 @@ walker query{
     has session_chat_history:list=[];
     has user_data: 'data about the health status of the user' :dict={};
     has todo_list: 'The tasks to be done by the user in the future.' :list=[];
+    has messages:list = [];
 
     can init_query_engine with session entry;
 }
+
+enum task_type {
+    # RAG_type : 'Need to use Retrivable information in specific finacial articles' = "RAG",
+    QA_TYPE : 'Need to use given user information' = "user_qa",
+    TODO_TYPE : 'Need to use the todo list of the user' = "todo"
+}
+
+glob router_examples: 'Examples of routing of a query': dict[str, task_type] = {
+    'When is my next check up?': task_type.TODO_TYPE,
+    'How healthy am I?': task_type.QA_TYPE
+};
 
 '''
 This is the router node which will be used to route the user query to the appropriate chat node.
@@ -94,6 +110,10 @@ TODO:Auto-routing feature not yet implemented
 '''
 node router {
     can route with query entry;
+    can 'route the query to the appropriate task type'
+    router_with_llm(query:'Query from the user to be routed.':str,
+                    todo_list:'The tasks to be done by the user in the future.':list,
+                    user_data:'data about the health status of the user.':dict) -> task_type by llm1(method="Reason", temperature=0.0, incl_info=(router_examples));
 }
 
 '''
@@ -112,12 +132,25 @@ This is the TODO chat node which will be used to chat with the user using the to
 node todo_chat {
     can run_todo with query entry {
         print('routed --> TODO');
-        print(self.chat_llm(todo_list=here.todo_list,query=here.query));
+
+        with st.chat_message("assistant"){
+        response = self.chat_llm(
+            todo_list=here.todo_list,
+            user_data=here.user_data,
+            query=here.query,
+            chat_history=here.messages
+            );
+        stream = st.write(response);
+        }
+        here.messages.append({"role": "assistant", "content": response});
+        save_data(messages = here.messages) spawn here;
     }
 
-    can 'You are a Health Assistant. Give a response based on the query using my todo list.'
-    chat_llm(todo_list:'data about the health status of the user':list,
-             query:'The tasks to be done by the user in the future.':str) -> 'response':str by llm();
+    can 'You are a Health Assistant. Give a response based on the query using todo list. and user data'
+    chat_llm(todo_list:'The tasks to be done by the user in the future.':list,
+             user_data:'data about the health status of the user.':dict,
+             query:'Question from the user to be answered.':str,
+             chat_history:'Previous Conversation with the user':list) -> 'response':str by llm2(method="Reason");
 }
 
 '''
@@ -127,29 +160,106 @@ TODO:Not yet implemented.
 node user_qa_chat {
     can run_user_qa with query entry {
         print('routed --> USER_QA');
+
+        with st.chat_message("assistant"){
+        response = self.chat_llm(
+            user_data=here.user_data,
+            query=here.query,
+            chat_history=here.messages
+        );
+        stream = st.write(response);
+        }
+
+        here.messages.append({"role": "assistant", "content": response});
+        save_data(messages = here.messages) spawn here;
+    }
+
+    can 'You are a Health Assistant. Give a response based on the query using user data'
+    chat_llm(user_data:'data about the health status of the user.':dict,
+             query:'Question form the user.':str,
+             chat_history:'Previous Conversation with the user':list) -> 'response':str by llm2(method="Reason");
+}
+
+walker save_data{
+    has messages:list = [];
+    can go_to_router with todo_chat | user_qa_chat  entry {
+        visit [<--];
+    }
+
+    can go_to_session with router entry {
+        visit [<--];
+    }
+    can save_data with session entry {
+        here.messages = self.messages;
+        disengage;
     }
 }
 
-can main {
-    print(state);
-    if state == PR_states.init {
-        create_graph(   user_data={ "age": 20,
-                                "Pressure": (120, 80),
-                                "Married": False
-                            },
-                     todo_list=["Do heart surgery : 04/12/2020",
-                                "Run Marathon : 14/12/2020",
-                                "Doctor's appointment : 20/12/2020"]
-                ) spawn root;
+can main() {
+    :g: state;
+
+    st.title("Baymax");
+
+    if state == PR_states.init_PR {
+        create_graph(   user_data = {
+                                    "age_years": 55,
+                                    "Gender": "Male",
+                                    "Height_cm": 175,
+                                    "Weight_kg": 85,
+                                    "BMI": 27.8,
+                                    "Blood_Pressure_mmHg": (145, 90),
+                                    "Married": True,
+                                    "Smoking_Status": "Former",
+                                    "Alcohol_Intake": "Moderate",
+                                    "Physical_Activity_Level": "Low",
+                                    "Cholesterol_Level_mg_dL": 240,
+                                    "HDL_mg_dL": 40,
+                                    "LDL_mg_dL": 160,
+                                    "Triglycerides_mg_dL": 200,
+                                    "Blood_Glucose_mg_dL": 180,
+                                    "HbA1c_percent": 8.0,
+                                    "Medications": ["Metformin", "Atorvastatin"],
+                                    "Family_History": {
+                                        "Diabetes": True,
+                                        "Heart_Disease": True,
+                                        "Stroke": False
+                                    },
+                                    "Allergies": ["Penicillin"],
+                                    "Regular_Checkups": True,
+                                    "Last_Checkup_Date": "2024-05-10"
+                                },
+
+                     todo_list = [
+                                    "Monitor blood pressure daily : 04/06/2024",
+                                    "Take medication (Metformin, Atorvastatin) : 05/06/2024",
+                                    "Schedule cardiology appointment : 10/06/2024",
+                                    "Complete blood tests : 15/06/2024",
+                                    "Attend diabetes education class : 20/06/2024",
+                                    "Follow up with dietitian : 25/06/2024",
+                                    "Exercise (30 minutes walk) : 26/06/2024",
+                                    "Annual physical checkup : 01/07/2024",
+                                    "Renew prescription for medications : 02/07/2024",
+                                    "Check cholesterol levels : 05/07/2024",
+                                    "Grocery shopping : 06/06/2024",
+                                    "Pick up dry cleaning : 07/06/2024",
+                                    "Call plumber for kitchen sink : 08/06/2024",
+                                    "Attend friend's wedding : 12/06/2024",
+                                    "Finish work project report : 18/06/2024",
+                                    "Family movie night : 22/06/2024",
+                                    "Plan weekend getaway : 28/06/2024",
+                                    "Pay utility bills : 29/06/2024",
+                                    "Renew car insurance : 03/07/2024",
+                                    "Buy birthday gift for spouse : 04/07/2024"
+                                ]) spawn root;
     state = PR_states.chat_create;
+    print('Graph created');
     } elif state == PR_states.chat_create {
-        query() spawn [[root -->](`user)[0] -->](`session)[0];
+        query() spawn [[root -->](`?user)[0] -->](`?session)[0];
+        print('Chatting with user');
+    } else {
+        print('Invalid state');
     }
 
-}
-
-with entry {
-    main();
 }
 
 ## Implementations ==================================================================================================================
@@ -186,25 +296,43 @@ with entry {
 :walker:query:can:init_query_engine {
     self.user_data:dict = here.user_data;
     self.todo_list:list = here.todo_list;
-    self.task_type:str = input('What is the routing method : ');
-    self.query:str = input('Enter your query : ');
+    self.messages:list = here.messages;
 
-    end = here;
-    end ++> (end := router());
-    end ++> RAG_chat();
-    end ++> todo_chat();
-    end ++> user_qa_chat();
+    for message in self.messages {
+        with st.chat_message(message["role"]) {
+            st.markdown(message["content"]);
+        }
+    }
 
+        # To input a new query
+
+    if [here -->] == [] {
+        end = here;
+        end ++> (end := router());
+        end ++> RAG_chat();
+        end ++> todo_chat();
+        end ++> user_qa_chat();
+    }
+
+    if prompt := st.chat_input("What is up?") {
+        self.query = prompt;
+        self.messages.append({"role": "user", "content": self.query});
+        with st.chat_message("user"){
+            st.markdown(self.query);
+        }
     visit [-->];
+    }
 }
 
 :node:router:can:route {
-    task:str = here.task_type;
-    if task == 'RAG' {
-        visit [-->](`?RAG_chat);
-    } elif task == 'QA'{
+    print('route');
+    task:task_type = self.router_with_llm(query = here.query, todo_list = here.todo_list, user_data = here.user_data);
+    print(task, type(task));
+    # if task == task_type.RAG_type {
+    #     visit [-->](`?RAG_chat);
+    if task == task_type.QA_TYPE{
         visit [-->](`?user_qa_chat);
-    } elif task == 'TODO' {
+    } elif task == task_type.TODO_TYPE {
         visit [-->](`?todo_chat);
     }
 }
