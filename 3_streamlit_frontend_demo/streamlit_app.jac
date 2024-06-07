@@ -5,6 +5,7 @@ import:py from PIL, Image;
 
 glob llm1 = OpenAI(model_name='gpt-3.5-turbo');
 glob llm2 = OpenAI(model_name='gpt-4');
+# glob llm2 = Ollama(model_name='tinyllama', verbose=True); # llama3-chatqa
 
 # glob llm = Huggingface(model_name='nvidia/Llama3-ChatQA-1.5-8B');
 
@@ -122,6 +123,12 @@ TODO:Not yet implemented.
 '''
 node RAG_chat {
     can run_RAG with query entry;
+    can 'You are a warmly Health Assistant named JacCare. Give a response based on the query using todo list. and user data'
+    chat_llm(todo_list:'The tasks to be done by the user in the future.':list,
+             user_data:'data about the health status of the user.':dict,
+             query:'Question from the user to be answered.':str,
+             retrived_context : 'Retrived information from expert articles':list,
+             chat_history:'Previous Conversation with the user':list) -> 'response':str by llm2(temperature =0.8);
 }
 
 '''
@@ -133,7 +140,7 @@ node todo_chat {
     chat_llm(todo_list:'The tasks to be done by the user in the future.':list,
              user_data:'data about the health status of the user.':dict,
              query:'Question from the user to be answered.':str,
-             chat_history:'Previous Conversation with the user':list) -> 'response':str by llm2(method="Reason");
+             chat_history:'Previous Conversation with the user':list) -> 'response':str by llm2(temperature =0.8);
 }
 
 '''
@@ -145,7 +152,7 @@ node user_qa_chat {
     can 'You are a warmly Health Assistant named JacCare. Give a response based on the query using user data'
     chat_llm(user_data:'data about the health status of the user.':dict,
              query:'Question form the user.':str,
-             chat_history:'Previous Conversation with the user':list) -> 'response':str by llm2(method="Reason");
+             chat_history:'Previous Conversation with the user':list) -> 'response':str by llm2(temperature =0.8);
 }
 
 walker save_data{
@@ -181,7 +188,8 @@ can main() {
 
     if state == PR_states.init_PR {
         create_graph(   user_data = {
-                                    "age_years": 55,
+                                    "First_name": "Jayanaka",
+                                    "age_years": 45,
                                     "Gender": "Male",
                                     "Height_cm": 175,
                                     "Weight_kg": 85,
@@ -221,8 +229,9 @@ can main() {
                                     "Check cholesterol levels : 05/07/2024",
                                     "Plan weekend getaway : 28/06/2024"
                                 ]) spawn root;
-    state = PR_states.chat_create;
     print('Graph created');
+    state = PR_states.chat_create;
+    query() spawn [[root -->](`?user)[0] -->](`?session)[0];
     } elif state == PR_states.chat_create {
         query() spawn [[root -->](`?user)[0] -->](`?session)[0];
         print('Chatting with user');
