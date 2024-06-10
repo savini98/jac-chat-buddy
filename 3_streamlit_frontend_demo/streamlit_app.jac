@@ -5,7 +5,7 @@ import:py from PIL, Image;
 
 glob llm1 = OpenAI(model_name='gpt-3.5-turbo');
 glob llm2 = OpenAI(model_name='gpt-4');
-# glob llm2 = Ollama(model_name='tinyllama', verbose=True); # llama3-chatqa
+# glob llm2 = Ollama(model_name='phi3', verbose=True); # llama3-chatqa
 
 # glob llm = Huggingface(model_name='nvidia/Llama3-ChatQA-1.5-8B');
 
@@ -342,6 +342,7 @@ can main() {
             query=here.query,
             chat_history=here.messages
         );
+        print('Shit =---->');
         stream = st.write(response);
     }
 
