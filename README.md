@@ -21,3 +21,4 @@ The query from the user should be routed to its specific type based upon the con
 ### [Assignment 1 - Building chatbot architecture in Jaclang](/Assignmnet%20Docs/Assignment_1.md)
 ### [Assignment 2 - Building a basic chatbot](/Assignmnet%20Docs/Assignment_2.md)
 ### [Assignment 3 - Develop a streamlit frontend for the chatbot](/Assignmnet%20Docs/Assignment_3.md)
+### [Assignment 3.5 - AutoRouting using LLMs](/Assignmnet%20Docs/Assignment_3_5.md)
