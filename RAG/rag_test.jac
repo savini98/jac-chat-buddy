@@ -7,8 +7,13 @@ import: py os;
 import: py argparse;
 import: py shutil;
 
+import: py from jaclang.core.llms, OpenAI;
+
+glob llm = OpenAI(model_name='gpt-4');
+
 glob file_path:str="books";
 glob chroma_path:str = "chroma";
+glob query:str ="What are the reasons for a back pain?";
 
 can load_documents(){
     document_loader = PyPDFDirectoryLoader(file_path);
@@ -82,11 +87,26 @@ can add_to_chroma(chunks: list[Document]){
 }
 
 
+can get_from_chroma(query:str){
+    db = Chroma(persist_directory=chroma_path, embedding_function=get_embedding_function());
+    results = db.similarity_search_with_score(query,k=5);
+    print(type(results));
+    return results;
+}
+
+can 'Generate a conversational response to the question like a doctor'
+    get_answer(
+    question: 'Question': str,
+    context: 'The context': str 
+    ) -> 'The response': str 
+    by llm();
+
+
 with entry{
     documents = load_documents();
     chunks = split_documents(documents);
     add_to_chroma(chunks);
-
+    print(get_answer(question=query, context=get_from_chroma(query)));
 }
 
 

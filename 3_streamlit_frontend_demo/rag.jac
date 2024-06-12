@@ -32,7 +32,6 @@ can retrieve_from_chroma(query:str,chroma_db_path:str,number_of_similar_docs:int
 }
 
 
-
 walker search_docs{
     has question:str="";
     has context:str="";
