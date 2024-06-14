@@ -35,6 +35,11 @@ obj rag_engine {
         return embeddings;
     }
 
+    '''
+    This ability will create unique IDs for chunks. 
+    Example: "books/Oxford Handbook.pdf:100:2:
+    Template: "Page Source:Page Number:Chunk Index"
+    '''
     can add_chunk_id(chunks:str){
         last_page_id = None;
         current_chunk_index = 0;
@@ -61,6 +66,9 @@ obj rag_engine {
         return chunks;
     }
 
+    '''
+    Creating/ Updating the Vector Database
+    '''
     can add_to_chroma(chunks: list[Document]){
         #Loading the existing database
         db = Chroma(persist_directory=self.chroma_path, embedding_function=self.get_embedding_function()); 
@@ -91,6 +99,9 @@ obj rag_engine {
         
     }
 
+    '''
+    Retreive the relevent chunks upon a query.
+    '''
     can get_from_chroma(query:str){
         db = Chroma(persist_directory=self.chroma_path, embedding_function=self.get_embedding_function());
         results = db.similarity_search_with_score(query,k=5);
