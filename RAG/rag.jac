@@ -62,12 +62,15 @@ obj rag_engine {
     }
 
     can add_to_chroma(chunks: list[Document]){
-        db = Chroma(persist_directory=self.chroma_path, embedding_function=self.get_embedding_function());
-        chunks_with_ids = self.add_chunk_id(chunks);
+        #Loading the existing database
+        db = Chroma(persist_directory=self.chroma_path, embedding_function=self.get_embedding_function()); 
+        chunks_with_ids = self.add_chunk_id(chunks);    #Chunk ID Calculation
 
+        #Adding and Updating the documents
         existing_items = db.get(include=[]);
         existing_ids = set(existing_items['ids']);
 
+        #Only adding new documents that does not exist in the database
         new_chunks = [];
         for chunk in chunks_with_ids{
             if chunk.metadata['id'] not in existing_ids{
@@ -87,7 +90,6 @@ obj rag_engine {
         }
         
     }
-
 
     can get_from_chroma(query:str){
         db = Chroma(persist_directory=self.chroma_path, embedding_function=self.get_embedding_function());
