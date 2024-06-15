@@ -1,0 +1,24 @@
+digraph {
+node [style="filled", shape="ellipse", fillcolor="invis", fontcolor="black"];
+0 -> 1  [label="GenericEdge "];
+1 -> 2  [label="GenericEdge "];
+2 -> 3  [label="GenericEdge "];
+3 -> 4  [label="GenericEdge "];
+4 -> 5  [label="GenericEdge "];
+5 -> 6  [label="GenericEdge "];
+6 -> 7  [label="GenericEdge "];
+7 -> 8  [label="GenericEdge "];
+8 -> 9  [label="GenericEdge "];
+9 -> 10  [label="GenericEdge "];
+0 [label="&lt;jaclang.core.construct.Root object at 0x7eff8521b6b0&gt;"fillcolor="#FFE9E9"];
+1 [label="turn()"fillcolor="#F0FFF0"];
+2 [label="turn()"fillcolor="#F5E5FF"];
+3 [label="turn()"fillcolor="#FFFFE0"];
+4 [label="turn()"fillcolor="#D2FEFF "];
+5 [label="turn()"fillcolor="#E8FFD7"];
+6 [label="turn()"fillcolor="#FFDEAD"];
+7 [label="turn()"fillcolor="#FFF0F5"];
+8 [label="turn()"fillcolor="#F5FFFA"];
+9 [label="turn()"fillcolor="#FFC0CB"];
+10 [label="turn()"fillcolor="#7FFFD4"];
+}
