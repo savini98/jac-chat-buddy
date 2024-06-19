@@ -1,8 +1,12 @@
 import:py streamlit as st;
 
-import:py from jaclang.core.llms, Groq;
+import:py from jaclang.core.llms, Ollama;
 
-glob llm = Groq();
+# glob llm = Groq();
+
+glob llm = Ollama(
+            model_name = "phi3" # Will pull model if does not exists
+            );
 
 '''
 The by LLM ability that generates the response to the query.
