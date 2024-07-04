@@ -16,7 +16,7 @@ To implement a RAG powered chatbot in jac-lang, different methodologies can be a
 
    - The PDF documents are broken down into smaller chunks.
 
-   > **Embedding Function :** ```get_embedding_functio```
+   > **Embedding Function :** ```get_embedding_function```
 
    - Embeddings are generated for each chunk using an embedding model.
    - In this implementation we are using OllamaEmbeddings from langchain using the model nomic-embed-text.
@@ -34,4 +34,13 @@ To implement a RAG powered chatbot in jac-lang, different methodologies can be a
 
    > **Context Retrieval :** ```get_from_chroma```
 
-   - Using the query
+   - Using the query passed into the query engine, 5 most relevent chunks are retrived from the vector DB which will be forwarded as the context for the LLM to generate a relevent response.
+
+## Assignment 4 - Task
+
+Add a RAG powered response generating feature for the chatbot and complete the full application implementation.
+
+### Should Include
+1. A RAG engine as described above. 
+2. A full fledged chatbot in any domain (do not need to restrict to medical domain).
+3. Can have multiple chats.
