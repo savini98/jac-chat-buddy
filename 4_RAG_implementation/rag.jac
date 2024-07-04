@@ -4,20 +4,18 @@ import: py from langchain.schema.document, Document;
 import: py from langchain_community.embeddings.ollama, OllamaEmbeddings;
 import: py from langchain_community.vectorstores.chroma, Chroma;
 import: py os;
-# import: py argparse;
-# import: py shutil;
 
 obj rag_engine {
     has file_path:str="books";
     has chroma_path:str = "chroma";
 
-    can postinit() {
+    can postinit {
         documents:list = self.load_documents();
         chunks:list = self.split_documents(documents);
         self.add_to_chroma(chunks);
     }
 
-    can load_documents(){
+    can load_documents{
         document_loader = PyPDFDirectoryLoader(self.file_path);
         return document_loader.load();
     }
@@ -30,7 +28,7 @@ obj rag_engine {
         return text_splitter.split_documents(documents);
     }
 
-    can get_embedding_function(){
+    can get_embedding_function{
         embeddings = OllamaEmbeddings(model='nomic-embed-text');
         return embeddings;
     }
