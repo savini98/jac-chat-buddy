@@ -81,6 +81,32 @@ walker create_graph{
     }
 }
 
+
+walker query {
+
+}
+
+node RAG {
+    can print_output with query entry;
+}
+
+node user_QA{
+    can print_output with query entry;
+}
+node user_TODO{
+    can print_output with query entry;
+}
+
+:node:RAG:can:print_output{
+    print("At RAG")
+}
+
+:node:user_QA:can:print_output{
+    print("At QA")
+}
+:node:user_TODO:can:print_output{
+    print("At TODO")
+}
 with entry {
     create_graph(   user_data={ "age": 20,
                                 "Pressure": (120, 80),
