@@ -67,7 +67,7 @@ node router {
     can ask_direction with query entry;
 }
 node RAG {
-    can print_output with query entry;
+    can print_output with query entry;##
 }
 
 node user_QA{
