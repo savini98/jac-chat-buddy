@@ -8,6 +8,14 @@ node user{
     has user_name:string="user";
 }
 
+walker query {
+    #can go_to_router with session entry;
+    has session_id : string = 100;
+    has user_data : dict = {}; # User data such as habits, heart rate etc.
+    has todo_list : list = []; # List of things to do by the user.
+    has inquiry_by_user: string = ''; 
+
+}
 '''
 Chat session of a user. This node contains the session_id, user_data and todo_list.
 This should also include the chat history. Can have multiple chat sessions.
@@ -16,6 +24,7 @@ node session{
     has session_id : string = 100;
     has user_data : dict = {}; # User data such as habits, heart rate etc.
     has todo_list : list = []; # List of things to do by the user.
+    can send_query_to_router with query entry;
 }
 
 '''
@@ -59,12 +68,10 @@ walker create_graph{
 }
 
 
-walker query {
-    can go_to_router with session entry;
-}
+
 
 node router {
-    can ask_direction with query entry;
+    can direct with query entry;
 }
 node RAG {
     can print_output with query entry;##
@@ -80,23 +87,63 @@ node user_TODO{
 
 :node:RAG:can:print_output{
     print("At RAG");
+    visit [<--];
 }
 
 :node:user_QA:can:print_output{
     print("At QA");
+    visit [<--];
 }
 :node:user_TODO:can:print_output{
     print("At TODO");
+    visit [<--];
 }
-
-:node:router:can:ask_direction{
-    end = here;
-    print("here");
-    val = input('What is the routing method : ');
-    if val == "RAG" {
-        end ++> RAG();
+:node:session:can:send_query_to_router{
+    print(31242434524234);
+    if here.session_id == self.session_id{
+        here.inquiry_by_user = input('What is the routing method : ');
+        if here.inquiry_by_user != "x"{
+        visit [-->];
+        }
     }
-    visit[-->];
+    else{
+    here.session_id = self.session_id;
+    here.user_data =self.user_data;
+    here.todo_list = self.todo_list;
+    here.inquiry_by_user = input('What is the routing method : ');
+    end = self;
+    end ++> (end := router());
+    end ++> RAG();
+    end ++> user_QA();
+    end ++> user_TODO();
+    visit [-->];
+    
+    }
+    
+    
+}
+:node:router:can:direct{
+    print(here.inquiry_by_user );
+    end = self;
+    if here.inquiry_by_user == "RAG" {
+        
+        here.inquiry_by_user = '';
+        visit [-->](`?RAG);
+    }
+    elif here.inquiry_by_user == "QA" {
+        
+        here.inquiry_by_user = '';
+        visit [-->](`?user_QA);
+    }elif here.inquiry_by_user == "RAG" {
+        
+        here.inquiry_by_user = '';
+        visit [-->](`?user_TODO);
+    }else
+    {
+        visit [<--];
+    }
+
+    
 }
 :walker:create_graph:can:generate_graph{
     end = here; # Assign the current root node (here) to end
@@ -123,17 +170,10 @@ node user_TODO{
 :walker:chat:can:chat_session{
         print(here.user_data);
         print(here.todo_list);
-        end = here; 
-        end ++> (end := router());
-        query() spawn session; #[-->](`?router);
-        print(12233);
+        query() spawn here; #[-->](`?router);
+        
 }
-:walker:query:can:go_to_router{
-    end = here;
-    end ++> router();
-    
-    visit[-->];
-}
+
 
 with entry {
     create_graph(   user_data={ "age": 20,
