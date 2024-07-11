@@ -1,6 +1,6 @@
 import:py streamlit as st;
 
-import:py from jaclang.core.llms, Groq;
+import:py from mtllm.llms, Groq;
 
 glob llm = Groq();
 
