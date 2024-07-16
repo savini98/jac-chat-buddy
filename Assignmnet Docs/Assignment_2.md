@@ -9,7 +9,13 @@ Here's a demonstration of how an LLM can be utilized to build a simple chatbot t
 
 3. **Generate and Send Response**: The LLM generates a response that is coherent and relevant to the user's query. This response is then sent back to the user, continuing the conversation.
 
-To realize this in JacLang, we have the ```by llm``` feature. Get more details on this feature by visiting JacLang [documentation.](https://www.jac-lang.org/learn/with_llm/)
+To realize this in JacLang, we have the ```by llm``` feature. Install the MTLLM package by,
+
+    ```bash
+    pip install mtllm
+    ```
+
+Get more details on this feature by visiting JacLang [documentation.](https://www.jac-lang.org/learn/with_llm/)
 
 [This](/2_basic_chatbot_jac_llm.jac) is a basic chatbot implementation using JacLang to respond for a single query. 
 
