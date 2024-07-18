@@ -1,14 +1,13 @@
+import:py json;
 import:py random;
 import:py from mtllm.llms, OpenAI, Ollama, Huggingface;
 import:py streamlit as st;
 import:py from PIL, Image;
 include:jac rag;
-include:jac gui;
+include:jac gui as GUI;
 
 glob llm1 = OpenAI(model_name='gpt-3.5-turbo');
 glob llm2 = OpenAI(model_name='gpt-4');
-# glob llm2 = Ollama(model_name='phi3', verbose=True); # llama3-chatqa
-# glob llm = Huggingface(model_name='nvidia/Llama3-ChatQA-1.5-8B');
 
 glob RagEngine:rag_engine = rag_engine();
 
@@ -178,7 +177,7 @@ can main() {
     :g: state;
     :g: RagEngine;
 
-    page_build();
+    GUI.page_build();
 
     if state == PR_states.init_PR {
         # Import the data from JSON file
