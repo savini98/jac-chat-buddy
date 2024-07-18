@@ -3,11 +3,11 @@ import:py from mtllm.llms, OpenAI, Ollama, Huggingface;
 import:py streamlit as st;
 import:py from PIL, Image;
 include:jac rag;
+include:jac gui;
 
 glob llm1 = OpenAI(model_name='gpt-3.5-turbo');
 glob llm2 = OpenAI(model_name='gpt-4');
 # glob llm2 = Ollama(model_name='phi3', verbose=True); # llama3-chatqa
-
 # glob llm = Huggingface(model_name='nvidia/Llama3-ChatQA-1.5-8B');
 
 glob RagEngine:rag_engine = rag_engine();
@@ -178,62 +178,16 @@ can main() {
     :g: state;
     :g: RagEngine;
 
-    st.set_page_config(
-                    page_title="JacCare Health Assistant",
-                    page_icon=":robot:",
-                    layout="wide");
-    # (left_co, cent_co,last_co) = st.columns(3);
-    # with cent_co {
-    # st.image(Image.open("images/JacCare LOGO.png"));
-    # st.title("${\Large JacCare}$");
-    # }
-
-    st.image(Image.open("images/JacCare LOGO.png"));
-    st.title("Jac${Care}$");
+    page_build();
 
     if state == PR_states.init_PR {
-        create_graph(   user_data = {
-                                    "First_name": "David",
-                                    "age_years": 45,
-                                    "Gender": "Male",
-                                    "Height_cm": 175,
-                                    "Weight_kg": 85,
-                                    "BMI": 27.8,
-                                    "Blood_Pressure_mmHg": (145, 90),
-                                    "Married": True,
-                                    "Smoking_Status": "Former",
-                                    "Alcohol_Intake": "Moderate",
-                                    "Physical_Activity_Level": "Low",
-                                    "Cholesterol_Level_mg_dL": 240,
-                                    "HDL_mg_dL": 40,
-                                    "LDL_mg_dL": 160,
-                                    "Triglycerides_mg_dL": 200,
-                                    "Blood_Glucose_mg_dL": 180,
-                                    "HbA1c_percent": 8.0,
-                                    "Medications": ["Metformin", "Atorvastatin"],
-                                    "Family_History": {
-                                        "Diabetes": True,
-                                        "Heart_Disease": True,
-                                        "Stroke": False
-                                    },
-                                    "Allergies": ["Penicillin"],
-                                    "Regular_Checkups": True,
-                                    "Last_Checkup_Date": "2024-05-10"
-                                },
+        # Import the data from JSON file
+        with open('data.json', 'r') as f{
+            imported_data = json.load(f);
+        }
 
-                        todo_list = [
-                                    "Monitor blood pressure daily : 04/06/2024",
-                                    "Take medication (Metformin, Atorvastatin) : 05/06/2024",
-                                    "Schedule cardiology appointment : 10/06/2024",
-                                    "Complete blood tests : 15/06/2024",
-                                    "Attend diabetes education class : 20/06/2024",
-                                    "Follow up with dietitian : 25/06/2024",
-                                    "Exercise (30 minutes walk) : 26/06/2024",
-                                    "Annual physical checkup : 01/07/2024",
-                                    "Renew prescription for medications : 02/07/2024",
-                                    "Check cholesterol levels : 05/07/2024",
-                                    "Plan weekend getaway : 28/06/2024"
-                                ]) spawn root;
+        create_graph(   user_data = imported_data['user_data'],
+                        todo_list = imported_data['todo_list']) spawn root;
     print('Graph created');
     state = PR_states.chat_create;
     query() spawn [[root -->](`?user)[0] -->](`?session)[0];
@@ -307,6 +261,8 @@ can main() {
     visit [-->];
     }
 }
+
+
 
 :node:router:can:route {
     print('route');
