@@ -2,7 +2,6 @@ import:py json;
 import:py random;
 import:py from mtllm.llms, OpenAI, Ollama, Huggingface;
 import:py streamlit as st;
-import:py from PIL, Image;
 import:jac gui;
 include:jac rag;
 
@@ -174,6 +173,8 @@ walker save_data{
 }
 
 can main() {
+    st.cache_data.clear();
+
     :g: state;
     :g: RagEngine;
 
