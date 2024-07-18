@@ -3,8 +3,8 @@ import:py random;
 import:py from mtllm.llms, OpenAI, Ollama, Huggingface;
 import:py streamlit as st;
 import:py from PIL, Image;
+import:jac gui;
 include:jac rag;
-include:jac gui as GUI;
 
 glob llm1 = OpenAI(model_name='gpt-3.5-turbo');
 glob llm2 = OpenAI(model_name='gpt-4');
@@ -177,7 +177,7 @@ can main() {
     :g: state;
     :g: RagEngine;
 
-    GUI.page_build();
+    gui.page_build();
 
     if state == PR_states.init_PR {
         # Import the data from JSON file

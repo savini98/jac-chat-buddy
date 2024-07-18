@@ -1,7 +1,6 @@
 import jaclang as jac
 
-app = jac.jac_import("streamlit_app", base_path=".")
-gui = jac.jac_import("gui", base_path=".")
-# print(app[0])
+app = jac.jac_import("streamlit_app", base_path=".")[0]
+print(app)
 
-app[0].main()
+app.main()
