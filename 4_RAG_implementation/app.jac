@@ -179,7 +179,7 @@ can main {
 
     if state == PR_states.init_PR {
         # Import the data from JSON file
-        with open('data.json', 'r') as f{
+        with open('user_info.json', 'r') as f{
             imported_data = json.load(f);
         }
 
