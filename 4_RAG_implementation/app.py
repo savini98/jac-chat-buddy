@@ -1,6 +1,9 @@
 import jaclang as jac
 
-app = jac.jac_import("streamlit_app", base_path=".")[0]
-#print(app)
+(app,) = jac.jac_import("streamlit_app", base_path=".")
+# if hasattr(app, 'main'):
+#     app.main()
+# else :
+#     print('Error')
 
 app.main()

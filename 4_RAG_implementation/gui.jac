@@ -6,12 +6,30 @@ can page_build {
                     page_title="JacCare Health Assistant",
                     page_icon=":robot:",
                     layout="wide");
-    # (left_co, cent_co,last_co) = st.columns(3);
-    # with cent_co {
-    # st.image(Image.open("images/JacCare LOGO.png"));
-    # st.title("${\Large JacCare}$");
-    # }
 
     st.image(Image.open("images/JacCare LOGO.png"));
     st.title("Jac${Care}$");
+}
+
+can chat_interface(query_walker:walker){
+    for message in query_walker.messages {
+        with st.chat_message(message["role"]) {
+            st.markdown(message["content"]);
+        }
+    }
+
+    if input := st.chat_input("What is up?") {
+        query_walker.query = input;
+        query_walker.messages.append({  "role": "user", 
+                                        "content": query_walker.query});
+        with st.chat_message("user"){
+            st.markdown(query_walker.query);
+        }
+    }
+}
+
+can display_response(response:str){
+    with st.chat_message("assistant"){
+        stream = st.write(response);
+    }
 }

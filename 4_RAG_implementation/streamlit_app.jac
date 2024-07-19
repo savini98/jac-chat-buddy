@@ -1,9 +1,8 @@
 import:py json;
 import:py random;
-import:py from mtllm.llms, OpenAI, Ollama, Huggingface;
-import:py streamlit as st;
+import:py from mtllm.llms, OpenAI;
 import:jac gui;
-include:jac rag;
+import:jac from rag, rag_engine;
 
 glob llm1 = OpenAI(model_name='gpt-3.5-turbo');
 glob llm2 = OpenAI(model_name='gpt-4');
@@ -130,7 +129,7 @@ node RAG_chat {
              user_data:'data about the health status of the user.':dict,
              query:'Question from the user to be answered.':str,
              retrived_context : 'Retrived information from expert articles':list,
-             chat_history:'Previous Conversation with the user':list) -> 'response':str by llm2(temperature =0.8);
+             chat_history:'Previous Conversation with the user':list) -> 'response':str by llm1(temperature =0.5);
 }
 
 '''
@@ -142,7 +141,7 @@ node todo_chat {
     chat_llm(todo_list:'The tasks to be done by the user in the future.':list,
              user_data:'data about the health status of the user.':dict,
              query:'Question from the user to be answered.':str,
-             chat_history:'Previous Conversation with the user':list) -> 'response':str by llm2(temperature =0.8);
+             chat_history:'Previous Conversation with the user':list) -> 'response':str by llm1(temperature =0.5);
 }
 
 '''
@@ -151,10 +150,10 @@ TODO:Not yet implemented.
 '''
 node user_qa_chat {
     can run_user_qa with query entry;
-    can 'You are a warmly Health Assistant named JacCare. Give a response based on the query using user data'
+    can 'You are a warmly Health Assistant named JacCare. Give a response based on the query, using user data'
     chat_llm(user_data:'data about the health status of the user.':dict,
              query:'Question form the user.':str,
-             chat_history:'Previous Conversation with the user':list) -> 'response':str by llm2(temperature =0.8);
+             chat_history:'Previous Conversation with the user':list) -> 'response':str by llm1(temperature =0.5);
 }
 
 walker save_data{
@@ -172,9 +171,7 @@ walker save_data{
     }
 }
 
-can main() {
-    st.cache_data.clear();
-
+can main {
     :g: state;
     :g: RagEngine;
 
@@ -200,6 +197,13 @@ can main() {
 
 }
 
+with entry {
+    if __name__ == "__main__"{
+        main();
+    }
+    
+}
+
 ## Implementations ==================================================================================================================
 
 :walker:chat:can:create_session {
@@ -207,7 +211,7 @@ can main() {
         # Telescope into the nodes connected to the user node without walking.
         data_node = [-->](`?data)[0]; # Getting the data node filtered. can use [0] as having only one such node.
         todo_node = [-->](`?todo)[0]; # Getting the todo node filtered. can use [0] as having only one such node.
-        new_session_id = str(random.randint(1,100));
+        new_session_id = str(random.randint(1000,9999));
 
         # Creating a new session node with the user data and todo list and connect it to the user.
         n = here ++> session(   session_id = new_session_id,
@@ -236,14 +240,6 @@ can main() {
     self.todo_list:list = here.todo_list;
     self.messages:list = here.messages;
 
-    for message in self.messages {
-        with st.chat_message(message["role"]) {
-            st.markdown(message["content"]);
-        }
-    }
-
-        # To input a new query
-
     if [here -->] == [] {
         end = here;
         end ++> (end := router());
@@ -252,45 +248,35 @@ can main() {
         end ++> user_qa_chat();
     }
 
-    if prompt := st.chat_input("What is up?") {
-        self.query = prompt;
-        self.messages.append({"role": "user", "content": self.query});
-        with st.chat_message("user"){
-            st.markdown(self.query);
-        }
+    # gui.display_chat(self.messages);
+    gui.chat_interface(query_walker=self);
+    
     visit [-->];
-    }
 }
 
 
 
 :node:router:can:route {
-    print('route');
     task:task_type = self.router_with_llm(query = here.query, todo_list = here.todo_list, user_data = here.user_data);
-    print(task, type(task));
     if task == task_type.RAG_TYPE {
         visit [-->](`?RAG_chat);
-    }
-    if task == task_type.QA_TYPE | task == None {
-        visit [-->](`?user_qa_chat);
     } elif task == task_type.TODO_TYPE {
         visit [-->](`?todo_chat);
+    } elif task == task_type.QA_TYPE | task != None {
+        visit [-->](`?user_qa_chat);
     }
 }
 
 :node:todo_chat:can:run_todo {
     print('routed --> TODO');
 
-    with st.chat_message("assistant"){
-        response = self.chat_llm(
+    response = self.chat_llm(
             todo_list=here.todo_list,
             user_data=here.user_data,
             query=here.query,
             chat_history=here.messages
         );
-        stream = st.write(response);
-    }
-
+    gui.display_response(response);
     here.messages.append({"role": "assistant", "content": response});
     save_data(messages = here.messages) spawn here;
 }
@@ -298,33 +284,27 @@ can main() {
 :node:user_qa_chat:can:run_user_qa {
     print('routed --> USER_QA');
 
-    with st.chat_message("assistant"){
-        response = self.chat_llm(
+    response = self.chat_llm(
             user_data=here.user_data,
             query=here.query,
             chat_history=here.messages
         );
-        stream = st.write(response);
-    }
-
+    gui.display_response(response);
     here.messages.append({"role": "assistant", "content": response});
     save_data(messages = here.messages) spawn here;
 }
 
 :node:RAG_chat:can:run_RAG {
     print('routed --> RAG');
-
-    with st.chat_message("assistant"){
-        response = self.chat_llm(
+    
+    response = self.chat_llm(
             todo_list=here.todo_list,
             user_data=here.user_data,
             query=here.query,
             chat_history=here.messages,
             retrived_context=RagEngine.get_from_chroma(query=here.query)
         );
-        stream = st.write(response);
-    }
-
+    gui.display_response(response);
     here.messages.append({"role": "assistant", "content": response});
     save_data(messages = here.messages) spawn here;
 }
