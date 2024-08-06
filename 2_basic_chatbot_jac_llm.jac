@@ -1,8 +1,7 @@
 import:py random;
-import:py from mtllm.llms, Anthropic;
+import:py from mtllm.llms, Groq;
 
-
-glob llm = Anthropic(model_name="claude-3-sonnet-20240229");
+glob llm = Groq(model_name = "llama3-8b-8192");
 
 '''
 User node has user_name attribute.

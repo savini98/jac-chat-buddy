@@ -1,5 +1,5 @@
 import:py random;
-
+import:py openai;
 
 '''
 User node has user_name attribute.
@@ -67,14 +67,11 @@ walker create_graph{
     can generate_graph with `root entry;
 }
 
-
-
-
 node router {
     can direct with query entry;
 }
 node RAG {
-    can print_output with query entry;##
+    can print_output with query entry;
 }
 
 node user_QA{
@@ -141,10 +138,9 @@ node user_TODO{
     }else
     {
         visit [<--];
-    }
-
-    
+    }    
 }
+
 :walker:create_graph:can:generate_graph{
     end = here; # Assign the current root node (here) to end
     end ++> (end := user()); # Create a user node and connect it to the end node. Assign the new user node to the end.
