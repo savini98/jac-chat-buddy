@@ -29,6 +29,7 @@ can main {
     }
 
     # To input a new query
+    print("here");
     if prompt := st.chat_input("What is up?") {
     messages.append({"role": "user", "content": prompt});
     with st.chat_message("user"){

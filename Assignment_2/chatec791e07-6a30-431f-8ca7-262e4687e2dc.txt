@@ -1,0 +1,2 @@
+@QA tell me about myself:You are 20 years old. Your blood pressure is 120/80 mmHg. And you are not married.
+@TODO whata are my tasks?:You have the tasks: Do heart surgery, Buy Bread, and Have pizza for dinner.

@@ -1,0 +1,20 @@
+digraph {
+node [style="filled", shape="ellipse", fillcolor="invis", fontcolor="black"];
+0 -> 1  [label="GenericEdge "];
+1 -> 2  [label="GenericEdge "];
+1 -> 3  [label="GenericEdge "];
+1 -> 4  [label="GenericEdge "];
+4 -> 5  [label="GenericEdge "];
+5 -> 6  [label="GenericEdge "];
+5 -> 7  [label="GenericEdge "];
+5 -> 8  [label="GenericEdge "];
+0 [label="Root"fillcolor="#FFE9E9"];
+1 [label="user(user_name=&#x27;user&#x27;)"fillcolor="#F0FFF0"];
+2 [label="data(user_data={&#x27;age&#x27;: 20, &#x27;Pressure&#x27;: (120, 80), &#x27;Married&#x27;: False})"fillcolor="#F5E5FF"];
+3 [label="todo(todo_list=[&#x27;Do heart surgery&#x27;, &#x27;Buy Bread&#x27;, &#x27;Have pizza for dinner&#x27;])"fillcolor="#F5E5FF"];
+4 [label="session(session_id=&#x27;24&#x27;, user_data={&#x27;age&#x27;: 20, &#x27;Pressure&#x27;: (120, 80), &#x27;Married&#x27;: False}, todo_list=[&#x27;Do heart surgery&#x27;, &#x27;Buy Bread&#x27;, &#x27;Have pizza for dinner&#x27;])"fillcolor="#F5E5FF"];
+5 [label="router()"fillcolor="#FFFFE0"];
+6 [label="RAG()"fillcolor="#D2FEFF "];
+7 [label="user_QA()"fillcolor="#D2FEFF "];
+8 [label="user_TODO()"fillcolor="#D2FEFF "];
+}
